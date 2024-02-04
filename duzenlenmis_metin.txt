@@ -8,9 +8,9 @@
 *am*,
 *amarım*,
 *ambiti*,
-*am biti*,
+e
 *amcığı* ,
-*amcığın*,
+test
 *amcığını*,
 *amcığınızı*,
 *amcık*,
