@@ -1,6 +1,10 @@
-name: refresh map
+name: Python
 
 on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
   schedule:
     - cron: "30 11 * * *"
 jobs:
