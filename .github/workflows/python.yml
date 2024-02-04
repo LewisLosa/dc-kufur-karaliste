@@ -10,37 +10,36 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
-      - uses: jannekem/run-python-script-action@v1
-      - run: |
-          python -m pip install --upgrade pip
-          pip install requests
-        with:
-          script: |
-            import requests
-            import re
-
-            # GitHub reposu URL'si
-            github_url = 'https://raw.githubusercontent.com/ooguz/turkce-kufur-karaliste/master/karaliste.txt'
-            try:
-                response = requests.get(github_url)
-                response.raise_for_status()
-                metin = response.text
-            except requests.exceptions.RequestException as e:
-                print(f'Hata: {e}')
-                metin = None
-            if metin:
-                desen = re.compile(r'(\b[^\n]+\b)')
-                sonuc = re.sub(desen, r'*\1*', metin)
-                sonuc = re.sub(r'\n', r',\n', sonuc)
-                yeni_dosya_adi = 'duzenlenmis_metin.txt'
-                with open(yeni_dosya_adi, 'w', encoding='utf-8') as yeni_dosya:
-                    yeni_dosya.write(sonuc)
-
-                print(f'Düzenlenmiş metin "{yeni_dosya_adi}" adlı dosyaya yazıldı.')
-            else:
-                print('Metin indirilemedi.')
-            # losa.dev tarafından yazılmıştır. <3
+    - name: Checkout repo content
+      uses: actions/checkout@v3 # checkout the repository content to GitHub runner
+      with:
+        repository: ${{ github.event.pull_request.head.repo.full_name }}
+        ref: ${{ github.event.pull_request.head.ref }}
+    
+    - name: Setup python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10" # install the python version needed
+    
+    - name: Install python packages
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Execute py script
+      run: python3 ../app.py
+          
+    - name: Commit files
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add -A
+        git commit -m "bot: Update file" -a
+      if: env.GIT_DIFF && env.MATCHED_FILES
+    
+    - name: Push changes
+      uses: ad-m/github-push-action@v0.6.0
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: master
+      if: env.GIT_DIFF && env.MATCHED_FILES
