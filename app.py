@@ -1,7 +1,7 @@
 import requests
 import re
 
-# GitHub reposu URL'si
+# Kaynak repository
 github_url = 'https://raw.githubusercontent.com/ooguz/turkce-kufur-karaliste/master/karaliste.txt'
 try:
     response = requests.get(github_url)
